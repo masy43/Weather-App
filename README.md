@@ -2,7 +2,7 @@
 
 A modern, responsive weather dashboard allowing users to track real-time weather conditions, forecasts, and air quality for any location worldwide. Built with vanilla HTML, CSS, and JavaScript, leveraging open-source APIs.
 
-![Weather App Preview](https://via.placeholder.com/800x450?text=Weather+App+Preview) <!-- Replace with actual screenshot if available -->
+![Weather App Preview](image.png) <!-- Replace with actual screenshot if available -->
 
 ## ✨ Features
 
