@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sleek Weather</title>
+    <link rel="stylesheet" href="assets/css/style.css" />
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <link
+      href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+      crossorigin=""
+    />
+  </head>
+  <body>
+    <div class="container">
+      <nav class="sidebar" aria-label="Primary">
+        <ul class="nav-links">
+          <li class="active" title="Dashboard" data-view="dashboard">
+            <a href="#">
+              <i class="ri-dashboard-line"></i>
+              <span>Dashboard</span>
+            </a>
+          </li>
+          <li title="Map" data-view="map">
+            <a href="#">
+              <i class="ri-map-2-line"></i>
+              <span>Map</span>
+            </a>
+          </li>
+          <li title="Calendar" data-view="calendar">
+            <a href="#">
+              <i class="ri-calendar-event-line"></i>
+              <span>Calendar</span>
+            </a>
+          </li>
+          <li title="Settings" data-view="settings">
+            <a href="#">
+              <i class="ri-settings-4-line"></i>
+              <span>Settings</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+
+      <main class="main-content">
+        <header class="header">
+          <div class="header-left">
+            <button
+              class="icon-btn menu-toggle"
+              type="button"
+              aria-label="Toggle navigation"
+            >
+              <i class="ri-menu-line"></i>
+            </button>
+            <div class="user-greeting">
+              <h1>Hello</h1>
+              <p>Discover the weather today</p>
+            </div>
+          </div>
+          <form class="search-box" role="search">
+            <i class="ri-search-line"></i>
+            <label for="search-input" class="visually-hidden">
+              Search for a city
+            </label>
+            <input
+              id="search-input"
+              name="search"
+              type="search"
+              placeholder="Search for cities..."
+              autocomplete="off"
+            />
+          </form>
+          <div class="header-right">
+            <button
+              class="icon-btn theme-toggle"
+              type="button"
+              aria-label="Toggle theme"
+            >
+              <i class="ri-moon-line"></i>
+            </button>
+          </div>
+        </header>
+
+        <div id="map-view" class="map-view">
+          <div id="map" style="height: 100%; width: 100%"></div>
+        </div>
+
+        <div id="calendar-view" class="panel-view"></div>
+
+        <div id="settings-view" class="panel-view"></div>
+
+        <div class="dashboard">
+          <div class="content-left">
+            <div class="card current-weather">
+              <div class="current-header">
+                <div class="location">
+                  <i class="ri-map-pin-line"></i>
+                  <span>London, UK</span>
+                </div>
+                <div class="time">Today, 12:45 PM</div>
+              </div>
+              <div class="current-body">
+                <div class="temp-display">
+                  <div class="temp">18°</div>
+                  <div class="condition">Mostly Cloudy</div>
+                </div>
+                <div class="weather-icon-lg">
+                  <i class="ri-sun-cloudy-fill"></i>
+                </div>
+              </div>
+              <div class="current-footer">
+                <div class="stat-item">
+                  <i class="ri-drop-line"></i>
+                  <span>15%</span>
+                  <small>Pressure</small>
+                </div>
+                <div class="stat-item">
+                  <i class="ri-windy-line"></i>
+                  <span>5 km/h</span>
+                  <small>Wind</small>
+                </div>
+                <div class="stat-item">
+                  <i class="ri-sun-line"></i>
+                  <span>6:00 AM</span>
+                  <small>Sunrise</small>
+                </div>
+              </div>
+            </div>
+
+            <div class="section-header">
+              <h2>Hourly Forecast</h2>
+              <a href="#" class="view-all">View All</a>
+            </div>
+            <div class="hourly-forecast">
+              <div class="hour-card">
+                <span class="hour">Now</span>
+                <i class="ri-sun-cloudy-line"></i>
+                <span class="temp">18°</span>
+              </div>
+              <div class="hour-card active">
+                <span class="hour">1 PM</span>
+                <i class="ri-sun-fill"></i>
+                <span class="temp">20°</span>
+              </div>
+              <div class="hour-card">
+                <span class="hour">2 PM</span>
+                <i class="ri-sun-fill"></i>
+                <span class="temp">21°</span>
+              </div>
+              <div class="hour-card">
+                <span class="hour">3 PM</span>
+                <i class="ri-cloudy-line"></i>
+                <span class="temp">19°</span>
+              </div>
+              <div class="hour-card">
+                <span class="hour">4 PM</span>
+                <i class="ri-rainy-line"></i>
+                <span class="temp">17°</span>
+              </div>
+              <div class="hour-card">
+                <span class="hour">5 PM</span>
+                <i class="ri-moon-cloudy-line"></i>
+                <span class="temp">16°</span>
+              </div>
+            </div>
+
+            <div class="section-header">
+              <h2>Today's Highlights</h2>
+            </div>
+            <div class="highlights-grid">
+              <div class="card highlight-card">
+                <h3>UV Index</h3>
+                <div class="highlight-value">5.0</div>
+                <div class="highlight-status">Moderate</div>
+                <div class="progress-bar">
+                  <div class="fill"></div>
+                </div>
+              </div>
+              <div class="card highlight-card">
+                <h3>Wind Status</h3>
+                <div class="highlight-value">7.8 <span>km/h</span></div>
+                <div class="highlight-desc">WSW Direction</div>
+              </div>
+              <div class="card highlight-card">
+                <h3>Sunrise & Sunset</h3>
+                <div class="sun-time">
+                  <i class="ri-arrow-up-circle-line up"></i>
+                  <div>
+                    <span>6:35 AM</span>
+                    <small>Sunrise</small>
+                  </div>
+                </div>
+                <div class="sun-time">
+                  <i class="ri-arrow-down-circle-line down"></i>
+                  <div>
+                    <span>5:42 PM</span>
+                    <small>Sunset</small>
+                  </div>
+                </div>
+              </div>
+              <div class="card highlight-card">
+                <h3>Humidity</h3>
+                <div class="highlight-value">12%</div>
+                <div class="highlight-status">Normal 🤙</div>
+                <div class="progress-bar">
+                  <div class="fill"></div>
+                </div>
+              </div>
+              <div class="card highlight-card">
+                <h3>Visibility</h3>
+                <div class="highlight-value">5.2 <span>km</span></div>
+                <div class="highlight-status">Average</div>
+              </div>
+              <div class="card highlight-card">
+                <h3>Air Quality</h3>
+                <div class="highlight-value">105</div>
+                <div class="highlight-status unhealthy">Unhealthy</div>
+              </div>
+            </div>
+          </div>
+
+          <aside class="content-right">
+            <div class="forecast-header">
+              <h2>7 Days Forecast</h2>
+            </div>
+            <div class="forecast-list card">
+              <div class="forecast-item">
+                <div class="day">Today</div>
+                <div class="icon-condition">
+                  <i class="ri-sun-cloudy-line"></i>
+                  <span>Sunny</span>
+                </div>
+                <div class="temp-range">
+                  <span class="high">36°</span>
+                  <span class="low">/ 22°</span>
+                </div>
+              </div>
+              <div class="forecast-item">
+                <div class="day">Tue</div>
+                <div class="icon-condition">
+                  <i class="ri-sun-line"></i>
+                  <span>Sunny</span>
+                </div>
+                <div class="temp-range">
+                  <span class="high">37°</span>
+                  <span class="low">/ 21°</span>
+                </div>
+              </div>
+              <div class="forecast-item">
+                <div class="day">Wed</div>
+                <div class="icon-condition">
+                  <i class="ri-cloudy-line"></i>
+                  <span>Cloudy</span>
+                </div>
+                <div class="temp-range">
+                  <span class="high">30°</span>
+                  <span class="low">/ 18°</span>
+                </div>
+              </div>
+              <div class="forecast-item">
+                <div class="day">Thu</div>
+                <div class="icon-condition">
+                  <i class="ri-rainy-line"></i>
+                  <span>Rainy</span>
+                </div>
+                <div class="temp-range">
+                  <span class="high">28°</span>
+                  <span class="low">/ 16°</span>
+                </div>
+              </div>
+              <div class="forecast-item">
+                <div class="day">Fri</div>
+                <div class="icon-condition">
+                  <i class="ri-thunderstorms-line"></i>
+                  <span>Storm</span>
+                </div>
+                <div class="temp-range">
+                  <span class="high">27°</span>
+                  <span class="low">/ 15°</span>
+                </div>
+              </div>
+              <div class="forecast-item">
+                <div class="day">Sat</div>
+                <div class="icon-condition">
+                  <i class="ri-sun-cloudy-line"></i>
+                  <span>Cloudy</span>
+                </div>
+                <div class="temp-range">
+                  <span class="high">32°</span>
+                  <span class="low">/ 20°</span>
+                </div>
+              </div>
+              <div class="forecast-item">
+                <div class="day">Sun</div>
+                <div class="icon-condition">
+                  <i class="ri-sun-line"></i>
+                  <span>Sunny</span>
+                </div>
+                <div class="temp-range">
+                  <span class="high">35°</span>
+                  <span class="low">/ 24°</span>
+                </div>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </main>
+    </div>
+    <script
+      src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+      crossorigin=""
+    ></script>
+    <script src="assets/js/script.js"></script>
+  </body>
+</html>
