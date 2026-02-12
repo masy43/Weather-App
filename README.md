@@ -2,7 +2,7 @@
 
 A modern, responsive weather dashboard allowing users to track real-time weather conditions, forecasts, and air quality for any location worldwide. Built with vanilla HTML, CSS, and JavaScript, leveraging open-source APIs.
 
-![Weather App Preview](image.png) <!-- Replace with actual screenshot if available -->
+![Weather App Preview](assets/img/image.png) <!-- Replace with actual screenshot if available -->
 
 ## ✨ Features
 
@@ -25,28 +25,28 @@ A modern, responsive weather dashboard allowing users to track real-time weather
 
 ## 📡 APIs Used
 
-1.  **[Open-Meteo API](https://open-meteo.com/)**:
-    - Weather Forecast API (Current, Hourly, Daily)
-    - Air Quality API
-2.  **[OpenStreetMap Nominatim](https://nominatim.org/)**:
-    - Forward Geocoding (Search)
-    - Reverse Geocoding (Location Name)
+1. **[Open-Meteo API](https://open-meteo.com/)**:
+   - Weather Forecast API (Current, Hourly, Daily)
+   - Air Quality API
+2. **[OpenStreetMap Nominatim](https://nominatim.org/)**:
+   - Forward Geocoding (Search)
+   - Reverse Geocoding (Location Name)
 
 ## 🚀 Getting Started
 
 No build process or installation is required since this project utilizes vanilla web technologies.
 
-1.  **Clone the repository**:
+1. **Clone the repository**:
 
-    ```bash
-    git clone https://github.com/yourusername/weather-app.git
-    ```
+   ```bash
+   git clone https://github.com/yourusername/weather-app.git
+   ```
 
-2.  **Open the project**:
-    - Navigate to the project folder.
-    - Open `index.html` in your preferred web browser.
+2. **Open the project**:
+   - Navigate to the project folder.
+   - Open `index.html` in your preferred web browser.
 
-    _Tip: For the best experience (and to avoid CORS issues with some browser security settings), use a local development server (like Live Server in VS Code)._
+   _Tip: For the best experience (and to avoid CORS issues with some browser security settings), use a local development server (like Live Server in VS Code)._
 
 ## 📂 Project Structure
 
@@ -73,4 +73,4 @@ The application adapts to various screen sizes:
 
 This project is open-source and available for educational purposes.
 
-## Live Demo : https://weather-app-ten-fawn-48.vercel.app/
+## Live Demo : [https://weather-app-ten-fawn-48.vercel.app/](https://weather-app-ten-fawn-48.vercel.app/)
