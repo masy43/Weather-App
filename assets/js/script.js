@@ -8,6 +8,7 @@ function initApp() {
   safeCall("setupHourlyForecastSlider");
   safeCall("setupLocationButton");
   setupUserName();
+  applySettingsToStaticContent();
 
   console.log("Weather App UI Initialized");
 }
@@ -18,6 +19,167 @@ function safeCall(fnName) {
     fn();
   }
 }
+
+/* ----- Settings Helper Functions ----- */
+
+function getTemperatureUnit() {
+  return localStorage.getItem("tempUnit") || "c";
+}
+
+function getTimeFormat() {
+  return localStorage.getItem("timeFormat") || "12";
+}
+
+function convertTemp(celsius) {
+  if (getTemperatureUnit() === "f") {
+    return Math.round((celsius * 9) / 5 + 32);
+  }
+  return Math.round(celsius);
+}
+
+function formatTempDisplay(celsius) {
+  return `${convertTemp(celsius)}°`;
+}
+
+function formatTime(dateInput) {
+  const date = dateInput instanceof Date ? dateInput : new Date(dateInput);
+  const is24 = getTimeFormat() === "24";
+  return date.toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: !is24,
+  });
+}
+
+function formatHourDisplay(hours) {
+  const is24 = getTimeFormat() === "24";
+  if (is24) {
+    return `${hours.toString().padStart(2, "0")}:00`;
+  }
+  return (hours % 12 || 12) + (hours >= 12 ? " PM" : " AM");
+}
+
+function parseTimeString(timeStr) {
+  const match = timeStr.match(/(\d+):(\d+)\s*(AM|PM)?/i);
+  if (!match) return null;
+  let hours = parseInt(match[1]);
+  const minutes = parseInt(match[2]);
+  if (match[3]) {
+    if (match[3].toUpperCase() === "PM" && hours !== 12) hours += 12;
+    if (match[3].toUpperCase() === "AM" && hours === 12) hours = 0;
+  }
+  return { hours, minutes };
+}
+
+function formatHourMinute(hours, minutes) {
+  const is24 = getTimeFormat() === "24";
+  if (is24) {
+    return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
+  }
+  const period = hours >= 12 ? "PM" : "AM";
+  const h12 = hours % 12 || 12;
+  return `${h12}:${minutes.toString().padStart(2, "0")} ${period}`;
+}
+
+function refreshWeatherDisplay() {
+  if (lastWeatherData) {
+    updateWeatherUI(
+      lastWeatherData.data,
+      lastWeatherData.locationName,
+      lastWeatherData.aqiData,
+    );
+  } else {
+    applySettingsToStaticContent();
+  }
+}
+
+function applySettingsToStaticContent() {
+  // Temperature conversion for static elements
+  document.querySelectorAll(".temp, .high, .low").forEach((el) => {
+    if (!el.dataset.celsius) {
+      const match = el.textContent.match(/-?\d+/);
+      if (match) el.dataset.celsius = match[0];
+    }
+    if (el.dataset.celsius) {
+      const converted = convertTemp(parseInt(el.dataset.celsius));
+      const isLow = el.classList.contains("low");
+      el.textContent = isLow ? `/ ${converted}°` : `${converted}°`;
+    }
+  });
+
+  // Time format for header
+  updateDateTime();
+
+  // Convert static hour labels
+  document.querySelectorAll(".hour-card .hour").forEach((el) => {
+    if (el.textContent === "Now") return;
+    if (!el.dataset.hour24) {
+      const match = el.textContent.match(/(\d+)\s*(AM|PM)/i);
+      if (match) {
+        let h = parseInt(match[1]);
+        if (match[2].toUpperCase() === "PM" && h !== 12) h += 12;
+        if (match[2].toUpperCase() === "AM" && h === 12) h = 0;
+        el.dataset.hour24 = h;
+      }
+    }
+    if (el.dataset.hour24) {
+      el.textContent = formatHourDisplay(parseInt(el.dataset.hour24));
+    }
+  });
+
+  // Convert static sunrise/sunset in stat items
+  document.querySelectorAll(".stat-item").forEach((el) => {
+    const small = el.querySelector("small");
+    const span = el.querySelector("span");
+    if (!small || !span) return;
+    if (small.textContent === "Sunrise" || small.textContent === "Sunset") {
+      if (!span.dataset.originalTime) {
+        span.dataset.originalTime = span.textContent.trim();
+      }
+      const parsed = parseTimeString(span.dataset.originalTime);
+      if (parsed) {
+        span.textContent = formatHourMinute(parsed.hours, parsed.minutes);
+      }
+    }
+  });
+
+  // Sun times in highlight cards
+  document.querySelectorAll(".sun-time span").forEach((span) => {
+    if (!span.dataset.originalTime) {
+      span.dataset.originalTime = span.textContent.trim();
+    }
+    const parsed = parseTimeString(span.dataset.originalTime);
+    if (parsed) {
+      span.textContent = formatHourMinute(parsed.hours, parsed.minutes);
+    }
+  });
+}
+
+function checkWeatherAlerts(weatherCode) {
+  if (localStorage.getItem("weatherAlerts") !== "on") return;
+  if (!("Notification" in window)) return;
+
+  if (weatherCode >= 80) {
+    const severity = weatherCode >= 95 ? "Severe" : "Moderate";
+    const condition = getWeatherConditionText(weatherCode);
+
+    if (Notification.permission === "granted") {
+      new Notification(`${severity} Weather Alert`, {
+        body: `Current condition: ${condition}. Please take precautions.`,
+      });
+    } else if (Notification.permission !== "denied") {
+      Notification.requestPermission().then((permission) => {
+        if (permission === "granted") {
+          new Notification(`${severity} Weather Alert`, {
+            body: `Current condition: ${condition}. Please take precautions.`,
+          });
+        }
+      });
+    }
+  }
+}
+
+/* ----- End Settings Helpers ----- */
 
 function setupTheme() {
   const themeBtn = document.querySelector(".theme-toggle");
@@ -223,6 +385,7 @@ let currentUserLocation = { lat: 0, lon: 0 };
 let mapInitialized = false;
 let map = null;
 let mapMarker = null;
+let lastWeatherData = null;
 
 async function fetchWeatherData(lat, lon) {
   currentUserLocation = { lat, lon };
@@ -276,6 +439,8 @@ async function fetchWeatherData(lat, lon) {
 }
 
 function updateWeatherUI(data, locationName, aqiData) {
+  lastWeatherData = { data, locationName, aqiData };
+
   const current = data.current_weather;
   const hourly = data.hourly;
   const daily = data.daily;
@@ -286,7 +451,7 @@ function updateWeatherUI(data, locationName, aqiData) {
   if (locationSpan) locationSpan.textContent = locationName;
 
   const tempDiv = document.querySelector(".current-body .temp");
-  if (tempDiv) tempDiv.textContent = `${Math.round(current.temperature)}°`;
+  if (tempDiv) tempDiv.textContent = formatTempDisplay(current.temperature);
 
   const conditionDiv = document.querySelector(".current-body .condition");
   if (conditionDiv)
@@ -310,17 +475,21 @@ function updateWeatherUI(data, locationName, aqiData) {
 
   // 7 Days Forecast
   updateDailyForecast(daily);
+
+  // Weather Alerts
+  checkWeatherAlerts(current.weathercode);
 }
 
 function updateDateTime() {
   const timeDiv = document.querySelector(".current-header .time");
   if (timeDiv) {
     const now = new Date();
+    const is24 = getTimeFormat() === "24";
     const options = {
       weekday: "long",
       hour: "numeric",
       minute: "numeric",
-      hour12: true,
+      hour12: !is24,
     };
     timeDiv.textContent = now.toLocaleDateString("en-US", options);
   }
@@ -338,11 +507,7 @@ function updateCurrentStats(pressure, wind, sunriseIso) {
   }
   if (stats[2] && sunriseIso) {
     const val = stats[2].querySelector("span");
-    const time = new Date(sunriseIso).toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-    if (val) val.textContent = time;
+    if (val) val.textContent = formatTime(sunriseIso);
   }
 }
 
@@ -364,9 +529,7 @@ function updateHourlyList(hourly) {
     const date = new Date(timeStr);
     const hours = date.getHours();
     const displayHour =
-      i === currentHourIndex
-        ? "Now"
-        : (hours % 12 || 12) + (hours >= 12 ? " PM" : " AM");
+      i === currentHourIndex ? "Now" : formatHourDisplay(hours);
 
     const div = document.createElement("div");
     div.className = "hour-card";
@@ -375,7 +538,7 @@ function updateHourlyList(hourly) {
     div.innerHTML = `
             <span class="hour">${displayHour}</span>
             <i class="${getWeatherIcon(code)}"></i>
-            <span class="temp">${Math.round(temp)}°</span>
+            <span class="temp">${formatTempDisplay(temp)}</span>
         `;
     container.appendChild(div);
   }
@@ -403,14 +566,8 @@ function updateHighlights(daily, current, hourly, aqiData) {
 
   // 3. Sunrise & Sunset
   if (cards[2]) {
-    const rise = new Date(daily.sunrise[0]).toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-    const set = new Date(daily.sunset[0]).toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+    const rise = formatTime(daily.sunrise[0]);
+    const set = formatTime(daily.sunset[0]);
     const times = cards[2].querySelectorAll(".sun-time span");
     if (times[0]) times[0].textContent = rise;
     if (times[1]) times[1].textContent = set;
@@ -470,8 +627,8 @@ function updateDailyForecast(daily) {
         : date.toLocaleDateString("en-US", { weekday: "short" });
 
     const code = daily.weathercode[i];
-    const max = Math.round(daily.temperature_2m_max[i]);
-    const min = Math.round(daily.temperature_2m_min[i]);
+    const max = convertTemp(daily.temperature_2m_max[i]);
+    const min = convertTemp(daily.temperature_2m_min[i]);
 
     const div = document.createElement("div");
     div.className = "forecast-item";
@@ -664,18 +821,28 @@ function renderSettings() {
   if (unitSelect) {
     unitSelect.addEventListener("change", (e) => {
       localStorage.setItem("tempUnit", e.target.value);
+      refreshWeatherDisplay();
     });
   }
 
   if (timeSelect) {
     timeSelect.addEventListener("change", (e) => {
       localStorage.setItem("timeFormat", e.target.value);
+      refreshWeatherDisplay();
     });
   }
 
   if (alertToggle) {
     alertToggle.addEventListener("change", (e) => {
-      localStorage.setItem("weatherAlerts", e.target.checked ? "on" : "off");
+      const enabled = e.target.checked ? "on" : "off";
+      localStorage.setItem("weatherAlerts", enabled);
+      if (
+        enabled === "on" &&
+        "Notification" in window &&
+        Notification.permission === "default"
+      ) {
+        Notification.requestPermission();
+      }
     });
   }
 }
@@ -773,7 +940,7 @@ function setupMobileNav() {
   // Close sidebar when a link is clicked
   navLinks.forEach((link) => {
     link.addEventListener("click", () => {
-      if (window.innerWidth <= 480) {
+      if (window.innerWidth <= 768) {
         sidebar.classList.remove("open");
         const icon = btn.querySelector("i");
         if (icon) icon.classList.replace("ri-close-line", "ri-menu-line");
@@ -784,7 +951,7 @@ function setupMobileNav() {
   // Close sidebar when clicking outside
   document.addEventListener("click", (e) => {
     if (
-      window.innerWidth <= 480 &&
+      window.innerWidth <= 768 &&
       sidebar.classList.contains("open") &&
       !sidebar.contains(e.target) &&
       !btn.contains(e.target)
